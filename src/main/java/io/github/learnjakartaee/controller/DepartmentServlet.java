@@ -12,11 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(urlPatterns = "/department")
@@ -41,14 +37,19 @@ public class DepartmentServlet extends HttpServlet {
         try {
             switch (action) {
                 case "/new":
+                    showNewForm(request, response);
                     break;
                 case "/insert":
+                    insertDept(request, response);
                     break;
                 case "/delete":
+                    deleteDept(request, response);
                     break;
                 case "/edit":
+                    showEditForm(request, response);
                     break;
                 case "/update":
+                    updateDept(request, response);
                     break;
                 default:
                     listDepartments(request, response);
@@ -65,6 +66,55 @@ public class DepartmentServlet extends HttpServlet {
         request.setAttribute("listDepartment", listBook);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/main/department.jsp");
         dispatcher.forward(request, response);
+    }
+
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/main/departmentForm.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        Long id = Long.parseLong(request.getParameter("id"));
+        Department depar = departmentRepository.get(id);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/main/department.jsp");
+        request.setAttribute("department", depar);
+        dispatcher.forward(request, response);
+
+    }
+
+    private void insertDept(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String dName = request.getParameter("department_name");
+
+        Department newBook = new Department();
+        newBook.setDepartmentName(dName);
+        departmentRepository.save(newBook);
+        response.sendRedirect("list");
+    }
+
+    private void updateDept(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        Long id = Long.parseLong(request.getParameter("id"));
+        String dName = request.getParameter("department_name");
+
+        Department newBook = new Department();
+        newBook.setId(id);
+        newBook.setDepartmentName(dName);
+        departmentRepository.updateDepartment(newBook);
+        response.sendRedirect("list");
+    }
+
+    private void deleteDept(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        Long id = Long.parseLong(request.getParameter("id"));
+
+        Department newBook = new Department();
+        newBook.setId(id);
+        departmentRepository.deleteBook(newBook);
+        response.sendRedirect("list");
+
     }
 
 
